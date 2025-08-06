@@ -13,40 +13,54 @@ public class CombineOnOverlap : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (isCombining) return;
+        Debug.Log($"[CombineOnOverlap] {gameObject.name} столкнулся с {collision.name}");
+
+        if (isCombining)
+        {
+            Debug.Log("[CombineOnOverlap] Уже идёт процесс объединения — пропуск");
+            return;
+        }
 
         CombineOnOverlap other = collision.GetComponent<CombineOnOverlap>();
-        if (other == null) return;
+        if (other == null)
+        {
+            Debug.Log("[CombineOnOverlap] Второй объект не имеет CombineOnOverlap");
+            return;
+        }
 
-        // Проверяем типы объектов для комбинирования
+        Debug.Log($"[CombineOnOverlap] Сравнение типов: {objectType} и {other.objectType}");
+
         if (other.objectType == this.objectType && (objectType == ObjectType.Stick || objectType == ObjectType.Branch))
         {
+            Debug.Log("[CombineOnOverlap] Условия для объединения выполнены");
+
             isCombining = true;
             other.isCombining = true;
 
-            // Определяем позицию для нового объекта (средняя точка)
             Vector3 newPosition = (transform.position + other.transform.position) / 2;
-
             GameObject newObject = null;
 
-            // Логика объединения
             if (objectType == ObjectType.Stick)
             {
-                // Две палочки -> ветка
+                Debug.Log("[CombineOnOverlap] Создаём ветку");
                 newObject = Instantiate(prefabBranch, newPosition, Quaternion.identity);
             }
             else if (objectType == ObjectType.Branch)
             {
-                // Две ветки -> доска
+                Debug.Log("[CombineOnOverlap] Создаём доску");
                 newObject = Instantiate(prefabBoard, newPosition, Quaternion.identity);
             }
 
             if (newObject != null)
             {
-                // Удаляем исходные объекты
                 Destroy(other.gameObject);
                 Destroy(this.gameObject);
             }
         }
+        else
+        {
+            Debug.Log("[CombineOnOverlap] Типы не совпадают или тип не поддерживается");
+        }
     }
+
 }
